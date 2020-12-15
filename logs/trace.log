@@ -1,0 +1,3 @@
+2020-12-14 18:41:17 bank [DEBUG] himan logged in 
+2020-12-14 18:41:17 bank [INFO] Customer [accountNumber=21, name=himan, balance=200.0, loginId=14]
+2020-12-14 18:41:20 bank [INFO] [Customer [accountNumber=21, name=himan, balance=200.0, loginId=0]]
