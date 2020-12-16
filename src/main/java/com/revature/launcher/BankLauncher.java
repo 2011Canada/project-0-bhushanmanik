@@ -1,6 +1,9 @@
 package com.revature.launcher;
 
 import java.awt.List;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Scanner;
 
 import org.apache.logging.log4j.LogManager;
@@ -16,6 +19,7 @@ public class BankLauncher {
 	
 	public static Logger bankLogger = LogManager.getLogger("com.revature.bank");
 
+	//Main menu method
 	public static void menu(String userName,String passWord) {
 		
 		BankDAO emd = new BankPostgresDAO();
@@ -24,30 +28,32 @@ public class BankLauncher {
 		int option;
 		Login c = emd.login(userName, passWord);
 		if(c == null) {
-			System.out.println("User does not exit. Wrong password!");
+			System.out.println("User does not exit. Wrong username or password!");
 
 		}
 		else {
-			
+			//if its an employee then it will go in the if statement
 			boolean isCustomer = c.isCustomer();
 			Customer cw = isCustomer?emd.getCustomerBasedOnLoginId(c.getLoginId()):null;
 			do {
 				if(isCustomer){
 			
-				System.out.println("1:Apply for account");
+				System.out.println("1:Apply for a new account under this username.");
 				System.out.println("2:View Account Info");
 				System.out.println("3:Deposit into account");
-				System.out.println("4:Withdraw into account");
+				System.out.println("4:Withdraw from account");
 				System.out.println("5:Transfer money into other account");
 				System.out.println("6:Accept money into account");
-				System.out.println("7.Exit");
+				System.out.println("7.Sign out and sign in as a different user.");
+				System.out.println("8.Exit");
 				}
 				else{
-				System.out.println("1:View customer account");
+				System.out.println("1:View all customer's accounts");
 				System.out.println("2:View log for all transactions");
 				System.out.println("3:Approve an account");
 				System.out.println("4:Reject an account");
-				System.out.println("5.Exit");
+				System.out.println("5.Sign out and sign in as a different user.");
+				System.out.println("6.Exit");
 				}
 				System.out.println("Select your option:");
 			    option = userIn.nextInt();
@@ -60,14 +66,10 @@ public class BankLauncher {
 			    		
 			    	}
 			    	else {
-			    		System.out.println("Enter the customer's account number to see his information:");
-			    		int optionTwo = userIn.nextInt();
-			    		Customer m = emd.ViewCustomerInfo(optionTwo);
-			    		if(m != null) {
-			    			System.out.println(m.toStringOne());
-			    		}
-			    		else {
-			    			System.out.println("Account does not exist");
+
+			    		java.util.List<Customer> m  = emd.ViewCustomerInfo();
+			    		for(int i = 0;i < m.size();i++) {
+			    			System.out.println("Customer [accountNumber=" + m.get(i).getAccountNumber() + ", name=" + m.get(i).getName() + ", balance=" + m.get(i).getBalance() + "]");
 			    		}
 			    	}
 			    	break;
@@ -81,7 +83,21 @@ public class BankLauncher {
 			    		}
 			    	}
 			    	else {
-			    		bankLogger.info(c);
+			    		BufferedReader reader;
+			    		try {
+			    			reader = new BufferedReader(new FileReader(
+			    					"/Users/User/Documents/GitHub/project-0-bhushanmanik/logs/trace.log"));
+			    			String line = reader.readLine();
+			    			while (line != null) {
+			    				System.out.println(line);
+			    				// read next line
+			    				line = reader.readLine();
+			    			}
+			    			reader.close();
+			    		} catch (IOException e) {
+			    			e.printStackTrace();
+			    		
+						}
 			    	}
 			    	break;
 			    case 3:
@@ -117,8 +133,8 @@ public class BankLauncher {
 			    	break;
 			    case 4:
 			    	if(isCustomer) {
-			    		System.out.println("Enter the account number in which you want to deposit : ");
-			    		int accountDeposit = userIn.nextInt();
+			    		System.out.println("Enter the account number from which you want to withdraw : ");
+			    		int accountwithdraw = userIn.nextInt();
 			    		
 			    		
 			    		System.out.println("Enter the amount you want to withdraw  ");
@@ -127,7 +143,7 @@ public class BankLauncher {
 			    		
 			    		if(withdrawAmount > 0 )
 						{
-						emd.withdrawMoney(accountDeposit, withdrawAmount);
+						emd.withdrawMoney(accountwithdraw, withdrawAmount);
 						}
 						else {
 							System.out.println("Please enter valid amount!");
@@ -156,7 +172,17 @@ public class BankLauncher {
 			    		
 		    		emd.transferMoney(cw.getAccountNumber(), transferAmount, transferAccount);
 			    	}
+
+			    	else {
+			    		System.out.println("Enter your Username : ");
+			    		String usernm = userIn.next();
+			    		
+			    		System.out.println("Enter your Password : ");
+			    		String passwd = userIn.next();
+			    		menu(usernm,passwd);
+			    	}
 		    	break;
+		    	
 			    case 6:
 			    	if(isCustomer) {
 			    		System.out.println("Do you want to accept all the transfers?(Y/N)");
@@ -171,7 +197,7 @@ public class BankLauncher {
 			    			
 
 				    		
-				    		if(acceptTransfer == "Y") {
+				    		if(acceptTransfer.equals("Y")) {
 				    			//boolean hasTransfer, int depositAccountNumber, double amount,int withdrawAccountNumber,int transferid
 				    			emd.moneyTransferRequests(true,c2.get(i).getSecondAccount(),c2.get(i).getAmount(),c2.get(i).getFirstAccount(),c2.get(i).getTransferId());
 				    		}
@@ -183,10 +209,19 @@ public class BankLauncher {
 	    		
 		    	}
 	    	break;
+			    case 7:
+			    	if(isCustomer) {
+			    		System.out.println("Enter your Username : ");
+			    		String usernm = userIn.next();
+			    		
+			    		System.out.println("Enter your Password : ");
+			    		String passwd = userIn.next();
+			    		menu(usernm,passwd);
+			    	}
+			    	
+		} 
 		}
-			    
-		}
-			    while(!((option == 7 && isCustomer) || (!isCustomer && option == 5)));
+			    while(!((option == 8 && isCustomer) || (!isCustomer && option == 6)));
 	   }
     }
 	

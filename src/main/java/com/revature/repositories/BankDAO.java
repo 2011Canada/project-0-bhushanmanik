@@ -33,7 +33,7 @@ public interface BankDAO {
 	
 	public Employee rejectAccount(int accountNumber);
 	
-	public Customer ViewCustomerInfo(int accountNumber);
+	public List<Customer> ViewCustomerInfo();
 
 	public Login login(String username, String password);
 
@@ -49,4 +49,5 @@ public interface BankDAO {
 	
 	public Login createNewLogin(String username, String password,String name,double balance,boolean approved,boolean isCustomer);
 
+	public Customer viewBalanceByAccount(int customerId);
 }

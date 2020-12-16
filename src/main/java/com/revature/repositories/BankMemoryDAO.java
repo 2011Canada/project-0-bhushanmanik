@@ -91,7 +91,7 @@ public class BankMemoryDAO implements BankDAO{
 	}
 
 	@Override
-	public Customer ViewCustomerInfo(int accountNumber) {
+	public List<Customer> ViewCustomerInfo() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -128,6 +128,12 @@ public class BankMemoryDAO implements BankDAO{
 
 	@Override
 	public Login createNewLogin(String username, String password,String name,double balance,boolean approved,boolean isCustomer) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Customer viewBalanceByAccount(int customerId) {
 		// TODO Auto-generated method stub
 		return null;
 	}

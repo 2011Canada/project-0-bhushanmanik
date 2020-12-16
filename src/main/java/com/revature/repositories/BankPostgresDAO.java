@@ -5,15 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import org.postgresql.jdbc.PgArray;
-
 import com.revature.launcher.BankLauncher;
-import com.revature.menus.BankingMenu;
 import com.revature.models.Customer;
 import com.revature.models.Employee;
 import com.revature.models.Login;
@@ -25,11 +21,10 @@ public class BankPostgresDAO implements BankDAO{
 
 	private ConnectionFactory cf = ConnectionFactory.getConnectionFactory();
 
-	
+	//login method
 	@Override
 	public Login login(String username, String password) {
 		Connection conn = this.cf.getConnection();
-		List<Customer> all = new ArrayList<Customer>();
 		Login c = new Login();
 		try {
 			String sql = "select * from \"Bank\".\"Login\" where \"Login\".\"Username\" = '" + username 
@@ -59,6 +54,7 @@ public class BankPostgresDAO implements BankDAO{
 		return c;
 	}
 
+	//existing customer applying for a new account
 	@Override
 	public Customer applyForNewAccount(Customer customer) {
 		Connection conn = cf.getConnection();
@@ -92,45 +88,43 @@ public class BankPostgresDAO implements BankDAO{
 			}
 			cf.releaseConnection(conn);
 		}
-		BankLauncher.bankLogger.info(customer);
+		//BankLauncher.bankLogger.info(customer);
 		// return the original object but with any database generated fields filled out
 		return customer;
 	}
 
+	//gets the customer based on its login id
 	public Customer getCustomerBasedOnLoginId(int loginId) {
 		Connection conn = this.cf.getConnection();
 		Customer c = new Customer();
 		try {
 			String sql = "select * from \"Bank\".\"Customer\" where \"Customer\".\"loginid\"=" + loginId + ";";
-			// we only use statements for very basic sql queries
+			
 			Statement s = conn.createStatement();
 
 			ResultSet res = s.executeQuery(sql);
 			
-			
 			while (res.next()) {
-				// make a new movie
-				
 				c.setName(res.getString("Name"));
 				c.setBalance(res.getDouble("Balance"));
 				c.setAccountNumber(res.getInt("AccountNumber"));
 				c.setLoginId(res.getInt("loginId"));
 				
 			}
-			// TODO
-			// repeat for finding books as well
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} finally {
-			// if we actually had a pool of connections, we would do this
+			
 			cf.releaseConnection(conn);
 		}
-		BankLauncher.bankLogger.info(c);
+		//BankLauncher.bankLogger.info(c);
 		return c;
 		
 	}
+	
+	//adding a customer
 	@Override
 	public Customer addCustomer(String name,double balance,int loginid,boolean approved) {
 		Connection conn = cf.getConnection();
@@ -170,40 +164,39 @@ public class BankPostgresDAO implements BankDAO{
 	}
 
 	
+	//viewing the balances of all customers
 	@Override
 	public List<Customer> viewBalance(int customerId) {
 		Connection conn = this.cf.getConnection();
 		List<Customer> all = new ArrayList<Customer>();
 		try {
 			String sql = "select * from \"Bank\".\"Customer\" where \"Customer\".\"loginid\"=" + customerId + ";";
-			// we only use statements for very basic sql queries
+			
 			Statement s = conn.createStatement();
 
 			ResultSet res = s.executeQuery(sql);
 			
 			
 			while (res.next()) {
-				// make a new movie
+				
 				Customer c = new Customer();
 				c.setName(res.getString("Name"));
 				c.setBalance(res.getDouble("Balance"));
 				c.setAccountNumber(res.getInt("AccountNumber"));
 				all.add(c);
 			}
-			// TODO
-			// repeat for finding books as well
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			// if we actually had a pool of connections, we would do this
 			cf.releaseConnection(conn);
 		}
-		BankLauncher.bankLogger.info(all);
+		
 		return all;
 	}
 
+	//withdraw money
 	@Override
 	public Customer withdrawMoney(int accountNumber, double balance) {
 		Connection conn = cf.getConnection();
@@ -240,11 +233,12 @@ public class BankPostgresDAO implements BankDAO{
 			}
 			cf.releaseConnection(conn);
 		}
-		BankLauncher.bankLogger.debug("Withdrawed the amount of " + balance + " from the account number" + accountNumber);
+		BankLauncher.bankLogger.debug("Withdrawed the amount of $" + balance + " from the account number :" + accountNumber);
 		// return the original object but with any database generated fields filled out
 		return c;
 	}
 
+	//Depositing money
 	@Override
 	public Customer depositMoney(int accountNumber, double balance) {
 		Connection conn = cf.getConnection();
@@ -254,10 +248,10 @@ public class BankPostgresDAO implements BankDAO{
 		try {
 			
 			conn.setAutoCommit(false);
-//UPDATE weather SET (temp_lo, temp_hi, prcp) = (temp_lo+1, temp_lo+15, DEFAULT) WHERE city = 'San Francisco' AND date = '2003-07-03';
+
 			String deposit = "Update \"Bank\".\"Customer\" set \"Balance\"= \"Balance\" +" + balance +
 					" where \"AccountNumber\" = " + accountNumber +"returning \"Balance\";";
-				//String deposit = "Update \"Bank\".\"Customer\" set \"Balance\"=" + balance + "where \"AccountNumber\" = " + accountNumber +";";
+				
 				// we only use statements for very basic sql queries
 				Statement s = conn.createStatement();
 
@@ -282,11 +276,12 @@ public class BankPostgresDAO implements BankDAO{
 			}
 			cf.releaseConnection(conn);
 		}
-		BankLauncher.bankLogger.debug("Deposited the amount of " + balance + " to the account number" + accountNumber);
+		BankLauncher.bankLogger.debug("Deposited the amount of $" + balance + " to the account number" + accountNumber);
 		// return the original object but with any database generated fields filled out
 		return c;
 	}
 
+	//transfering money to other account
 	@Override
 	public Customer transferMoney(int accountNumber, double balance, int secondAccount) {
 		Connection conn = cf.getConnection();
@@ -319,11 +314,12 @@ public class BankPostgresDAO implements BankDAO{
 			}
 			cf.releaseConnection(conn);
 		}
-		BankLauncher.bankLogger.debug("Transfered money from account number : " + accountNumber + "to account number :" + secondAccount) ;
+		BankLauncher.bankLogger.debug("Transfered money from account number : " + accountNumber + " to account number :" + secondAccount) ;
 		// return the original object but with any database generated fields filled out
 		return customer;
 	}
 
+	//accept money transfers
 	@Override
 	public List<Transfers> acceptMoneyTransfer(int accountNumber) {
 		Connection conn = this.cf.getConnection();
@@ -359,6 +355,7 @@ public class BankPostgresDAO implements BankDAO{
 		return all;
 	}
 
+	//approving accounts
 	@Override
 	public List<Customer> approveAccount() {
 		Connection conn = this.cf.getConnection();
@@ -390,38 +387,36 @@ public class BankPostgresDAO implements BankDAO{
 			// if we actually had a pool of connections, we would do this
 			cf.releaseConnection(conn);
 		}
-		BankLauncher.bankLogger.info(all);
+		//BankLauncher.bankLogger.info(all);
 		return all;
 	}
 
+	//rejecting account
 	@Override
 	public Employee rejectAccount(int accountNumber) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	//list of customer info
 	@Override
-	public Customer ViewCustomerInfo(int accountNumber) {
+	public List<Customer> ViewCustomerInfo() {
 		Connection conn = this.cf.getConnection();
-		Customer c = new Customer();
+		List<Customer> all = new ArrayList<Customer>();
+		
 		try {
-			String sql = "select * from \"Bank\".\"Customer\" where \"Customer\".\"AccountNumber\"=" + accountNumber + ";";
-			// we only use statements for very basic sql queries
+			String sql = "select * from \"Bank\".\"Customer\" where \"Customer\".\"approved\" = true;";
+			
 			Statement s = conn.createStatement();
-
 			ResultSet res = s.executeQuery(sql);
 			
-			
 			while (res.next()) {
-				// make a new movie
-				
+				Customer c = new Customer();
 				c.setName(res.getString("Name"));
 				c.setBalance(res.getDouble("Balance"));
 				c.setAccountNumber(res.getInt("AccountNumber"));
-				
+				all.add(c);
 			}
-			// TODO
-			// repeat for finding books as well
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -431,10 +426,11 @@ public class BankPostgresDAO implements BankDAO{
 			cf.releaseConnection(conn);
 		}
 		//BankLauncher.bankLogger.info(c);
-		return c;
+		return all;
 	}
 
 
+	//money transfer requests
 	@Override
 	public Customer moneyTransferRequests(boolean hasTransfer, int depositAccountNumber, double amount,int withdrawAccountNumber,int transferid) {
 		if(hasTransfer) {
@@ -450,6 +446,7 @@ public class BankPostgresDAO implements BankDAO{
 		return null;
 	}
 
+	//delete transfers
 	@Override
 	public Customer deleteTransfers(int transferId) {
 		Connection conn = cf.getConnection();
@@ -459,10 +456,8 @@ public class BankPostgresDAO implements BankDAO{
 		try {
 			
 			conn.setAutoCommit(false);
-//UPDATE weather SET (temp_lo, temp_hi, prcp) = (temp_lo+1, temp_lo+15, DEFAULT) WHERE city = 'San Francisco' AND date = '2003-07-03';
 			String deleteTransfer = "delete from \"Bank\".\"transfers\"  where \"transferid\" = " + transferId +"returning \"transferid\";";
-				//String deposit = "Update \"Bank\".\"Customer\" set \"Balance\"=" + balance + "where \"AccountNumber\" = " + accountNumber +";";
-				// we only use statements for very basic sql queries
+
 				Statement s = conn.createStatement();
 
 				ResultSet res = s.executeQuery(deleteTransfer);
@@ -481,16 +476,16 @@ public class BankPostgresDAO implements BankDAO{
 				conn.commit();
 				conn.setAutoCommit(true);
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 			cf.releaseConnection(conn);
 		}
-		BankLauncher.bankLogger.info(c);
-		// return the original object but with any database generated fields filled out
 		return c;
 	}
 
+	
+	//appproved by employee
 	@Override
 	public Customer ApprovedByEmployee(int accountNumber) {
 		Connection conn = cf.getConnection();
@@ -526,11 +521,12 @@ public class BankPostgresDAO implements BankDAO{
 			}
 			cf.releaseConnection(conn);
 		}
-		BankLauncher.bankLogger.info(c);
+		//BankLauncher.bankLogger.debug("A customer's account got approved by an employee");
 		// return the original object but with any database generated fields filled out
 		return c;
 	}
 
+	//deleting customer
 	@Override
 	public Customer DeleteCustomerIfRejected(int accountNumber) {
 		Connection conn = cf.getConnection();
@@ -540,10 +536,8 @@ public class BankPostgresDAO implements BankDAO{
 		try {
 			
 			conn.setAutoCommit(false);
-//UPDATE weather SET (temp_lo, temp_hi, prcp) = (temp_lo+1, temp_lo+15, DEFAULT) WHERE city = 'San Francisco' AND date = '2003-07-03';
+
 			String deleteTransfer = "delete from \"Bank\".\"Customer\"  where \"AccountNumber\" = " + accountNumber +"returning \"AccountNumber\";";
-				//String deposit = "Update \"Bank\".\"Customer\" set \"Balance\"=" + balance + "where \"AccountNumber\" = " + accountNumber +";";
-				// we only use statements for very basic sql queries
 				Statement s = conn.createStatement();
 
 				ResultSet res = s.executeQuery(deleteTransfer);
@@ -566,11 +560,12 @@ public class BankPostgresDAO implements BankDAO{
 			}
 			cf.releaseConnection(conn);
 		}
-		//BankLauncher.bankLogger.info(c);
+		//BankLauncher.bankLogger.debug("A rejected customer was deleted");
 		// return the original object but with any database generated fields filled out
 		return c;
 	}
 
+	//create new login and customer
 	@Override
 	public Login createNewLogin(String username, String password,String name,double balance,boolean approved,boolean isCustomer) {
 		Connection conn = cf.getConnection();
@@ -613,10 +608,39 @@ public class BankPostgresDAO implements BankDAO{
 			}
 			cf.releaseConnection(conn);
 		}
-		//BankLauncher.bankLogger.info(customer);
-		// return the original object but with any database generated fields filled out
+		//BankLauncher.bankLogger.debug("A new login was created");
+		
 		return login;
 		
 	}
+	@Override
+	public Customer viewBalanceByAccount(int customerId) {
+		Connection conn = this.cf.getConnection();
+		Customer c = new Customer();
+		try {
+			String sql = "select * from \"Bank\".\"Customer\" where \"Customer\".\"AccountNumber\" =" + customerId + ";";
+			
+			Statement s = conn.createStatement();
 
+			ResultSet res = s.executeQuery(sql);
+			
+			
+			while (res.next()) {
+				
+				
+				c.setName(res.getString("Name"));
+				c.setBalance(res.getDouble("Balance"));
+				c.setAccountNumber(res.getInt("AccountNumber"));
+				
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			// if we actually had a pool of connections, we would do this
+			cf.releaseConnection(conn);
+		}
+		
+		return c;
+	}
 }

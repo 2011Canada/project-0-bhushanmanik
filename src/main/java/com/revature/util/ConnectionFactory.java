@@ -43,8 +43,6 @@ public class ConnectionFactory {
 			e.printStackTrace();
 		}
 		
-		
-		
 	}
 	
 	//if we were gonna implement for real
