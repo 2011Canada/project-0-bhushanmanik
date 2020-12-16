@@ -20,7 +20,7 @@ public class BankPostgresDAOTest {
 	
 		Customer c = bpd.viewBalanceByAccount(9);
 		
-		assertEquals(8425.00, c.getBalance());
+		assertEquals(8433.00, c.getBalance());
 		
 	}
 

@@ -4,6 +4,7 @@ import java.awt.List;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import org.apache.logging.log4j.LogManager;
@@ -32,12 +33,14 @@ public class BankLauncher {
 
 		}
 		else {
+			try {
+			
 			//if its an employee then it will go in the if statement
 			boolean isCustomer = c.isCustomer();
 			Customer cw = isCustomer?emd.getCustomerBasedOnLoginId(c.getLoginId()):null;
 			do {
 				if(isCustomer){
-			
+				System.out.println();
 				System.out.println("1:Apply for a new account under this username.");
 				System.out.println("2:View Account Info");
 				System.out.println("3:Deposit into account");
@@ -48,6 +51,7 @@ public class BankLauncher {
 				System.out.println("8.Exit");
 				}
 				else{
+				System.out.println();
 				System.out.println("1:View all customer's accounts");
 				System.out.println("2:View log for all transactions");
 				System.out.println("3:Approve an account");
@@ -197,8 +201,8 @@ public class BankLauncher {
 			    			
 
 				    		
-				    		if(acceptTransfer.equals("Y")) {
-				    			//boolean hasTransfer, int depositAccountNumber, double amount,int withdrawAccountNumber,int transferid
+				    		if(acceptTransfer.equals("Yes") || acceptTransfer.equals("yes") || acceptTransfer.equals("Y") || acceptTransfer.equals("y")) {
+				    			
 				    			emd.moneyTransferRequests(true,c2.get(i).getSecondAccount(),c2.get(i).getAmount(),c2.get(i).getFirstAccount(),c2.get(i).getTransferId());
 				    		}
 				    		else {
@@ -222,6 +226,9 @@ public class BankLauncher {
 		} 
 		}
 			    while(!((option == 8 && isCustomer) || (!isCustomer && option == 6)));
+			}catch(InputMismatchException m) {
+				System.out.println("Please enter a integer ");
+			}
 	   }
     }
 	
@@ -232,15 +239,20 @@ public class BankLauncher {
 		
 		Scanner userIn = new Scanner(System.in);
 		
-		System.out.println("Welcome to your Bank! ");
-		System.out.println("Enter Yes if you are already a customer or an employee, otherwise enter no");
+		System.out.println("|------------------------------------Welcome to Manik's Bank! ------------------------------------|\n");
+		System.out.println("Existing users, please enter yes to go to the login page !  otherwise enter no, to register a bank account.");
 		String mainOption = userIn.nextLine();
 		
 		if(mainOption.equals("Yes") || mainOption.equals("yes") || mainOption.equals("Y") || mainOption.equals("y")) {
 		
+			System.out.println();
+			
+		System.out.println("Existing user\n");
 		
 		System.out.println("Enter your Username : ");
 		String userName = userIn.nextLine();
+		
+		System.out.println();
 		
 		System.out.println("Enter your Password : ");
 		String passWord = userIn.nextLine();
@@ -249,6 +261,7 @@ public class BankLauncher {
 
 	}
 		else {
+			
 			
 			System.out.println("Enter the username you want:  ");
     		String newUsername = userIn.next();
